@@ -1,0 +1,88 @@
+\documentclass[aspectratio=1610]{beamer}
+
+% Basic setup
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% Define colors
+\definecolor{headerblue}{RGB}{63, 81, 181}
+
+% Set colors
+\setbeamercolor{palette primary}{bg=headerblue,fg=white}
+
+% Custom footline for all slides
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=0.3cm,center]{palette primary}%
+    {\color{white}\small\textbf{Group 14 CSA (MEC) \hfill CSD 415 - PROJECT PHASE I \hfill November 4, 2024 \hfill \insertframenumber{} / \inserttotalframenumber}}
+  \end{beamercolorbox}%
+}
+
+% Custom title page
+\defbeamertemplate*{title page}{customized}[1][]
+{ 
+  % Centered rounded header box with shadow
+  \begin{center}
+    \begin{tikzpicture}
+      % Shadow layer
+      \node[fill=black!30, rounded corners=10pt, 
+            minimum width=0.85\textwidth, minimum height=1.5cm] 
+            at (0.1,-0.1) {};
+      % Main box
+      \node[fill=headerblue, text=white, rounded corners=10pt, 
+            minimum width=1\textwidth, minimum height=1.5cm,
+            align=center] {
+        {\Large\textbf{CSD 415 PROJECT PHASE I PRESENTATION}}\\[0.1cm]
+        {\large FADEVEIL}
+      };
+    \end{tikzpicture}
+  \end{center}
+  
+% Content
+  \begin{center}
+    {\Large\textbf{GROUP - 14}}
+    
+    {\normalsize\textbf{Group Members}}\\[0.2cm]
+    {\small
+    \textbf{21CSA64 LBT21CS127 T A ASMA}\\
+    \textbf{21CSA68 LMDL21CS131 GOKUL GOPI}\\
+    \textbf{21CSA69 LMDL21CS133 MANIKANDAN S}\\
+    \textbf{21CSA68 LMDL21CS131 GOKUL GOPI}\\
+    \textbf{21CSA69 LMDL21CS133 MANIKANDAN S}\\
+    \textbf{21CSA66 LMDL21CS129 AMAL S}\\[0.2cm]
+    }
+    
+    {\normalsize\textbf{Project Guide}}\\
+    {\normalsize\textbf{Maria Vijoy}}\\
+    {\small Assistant Professor}\\[0.1cm]
+    
+    \includegraphics[width=1cm]{college_logo}\\[0.1cm]
+    
+    {\small
+    Department of Computer Science and Engineering\\
+    Model Engineering College, Thrikkakara}
+  \end{center}
+}
+
+\title{CSD 415 PROJECT PHASE I PRESENTATION}
+\subtitle{FADEVEIL}
+\author{Group 14}
+\date{November 4, 2024}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Your Next Slide Title}
+  \begin{itemize}
+    \item Your content here
+    \item Add more bullet points
+    \item Continue with your presentation
+  \end{itemize}
+\end{frame}
+
+\end{document}
