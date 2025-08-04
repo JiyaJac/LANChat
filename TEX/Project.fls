@@ -1,6 +1,6 @@
-PWD c:\Users\jiyam\jiya_projects\LANChat
+PWD c:\Users\jiyam\jiya_projects\LANChat\TEX
 INPUT C:\Users\jiyam\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\jiyam\jiya_projects\LANChat\Project.tex
+INPUT c:\Users\jiyam\jiya_projects\LANChat\TEX\Project.tex
 OUTPUT Project.log
 INPUT C:\Users\jiyam\AppData\Local\Programs\MiKTeX\tex\latex\beamer\beamer.cls
 INPUT C:\Users\jiyam\AppData\Local\Programs\MiKTeX\tex\latex\beamer\beamer.cls

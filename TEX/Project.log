@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.2)  4 AUG 2025 07:42
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.2)  4 AUG 2025 07:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**c:/Users/jiyam/jiya_projects/LANChat/Project.tex
-(c:/Users/jiyam/jiya_projects/LANChat/Project.tex
+**c:/Users/jiyam/jiya_projects/LANChat/TEX/Project.tex
+(c:/Users/jiyam/jiya_projects/LANChat/TEX/Project.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
 (C:\Users\jiyam\AppData\Local\Programs\MiKTeX\tex/latex/beamer\beamer.cls
@@ -931,12 +931,12 @@ Package rerunfilecheck Info: File `Project.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  24866 strings out of 474486
- 494322 string characters out of 5743756
+ 494362 string characters out of 5743756
  1936542 words of memory out of 5000000
  46610 multiletter control sequences out of 15000+600000
  577893 words of font info for 86 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 128i,13n,123p,446b,806s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 128i,13n,123p,450b,806s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecss1095.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcss1000.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1000.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecss1440.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecsx1000.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecss1000.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecsx1095.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecss1200.pk> <C:\Users\jiyam\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecsx1440.pk><C:/Users/jiyam/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
 Output written on Project.pdf (16 pages, 240582 bytes).
 PDF statistics:
