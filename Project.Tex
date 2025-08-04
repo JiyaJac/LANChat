@@ -6,6 +6,8 @@
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{array}
+\usepackage{booktabs}
 
 % Define colors
 \definecolor{headerblue}{RGB}{63, 81, 181}
@@ -16,7 +18,7 @@
 % Custom footline for all slides
 \setbeamertemplate{footline}{%
   \begin{beamercolorbox}[wd=\paperwidth,ht=0.3cm,center]{palette primary}%
-    {\color{white}\small\textbf{Group 14 CSA (MEC) \hfill CSD 415 - PROJECT PHASE I \hfill November 4, 2024 \hfill \insertframenumber{} / \inserttotalframenumber}}
+    {\color{white}\small\textbf{Group 1 CSB (MEC) \hfill PBCST 304 - PROJECT PHASE I \hfill August 4, 2025 \hfill \insertframenumber{} / \inserttotalframenumber}}
   \end{beamercolorbox}%
 }
 
@@ -34,28 +36,29 @@
       \node[fill=headerblue, text=white, rounded corners=10pt, 
             minimum width=1\textwidth, minimum height=1.5cm,
             align=center] {
-        {\Large\textbf{CSD 415 PROJECT PHASE I PRESENTATION}}\\[0.1cm]
-        {\large FADEVEIL}
+        {\Large\textbf{PBCST 304 PROJECT PHASE I PRESENTATION}}\\[0.1cm]
+        {\large LanChat}
       };
     \end{tikzpicture}
   \end{center}
   
 % Content
   \begin{center}
-    {\Large\textbf{GROUP - 14}}
+    {\Large\textbf{GROUP - 1}}
     
     {\normalsize\textbf{Group Members}}\\[0.2cm]
     {\small
-    \textbf{21CSA64 LBT21CS127 T A ASMA}\\
-    \textbf{21CSA68 LMDL21CS131 GOKUL GOPI}\\
-    \textbf{21CSA69 LMDL21CS133 MANIKANDAN S}\\
-    \textbf{21CSA68 LMDL21CS131 GOKUL GOPI}\\
-    \textbf{21CSA69 LMDL21CS133 MANIKANDAN S}\\
-    \textbf{21CSA66 LMDL21CS129 AMAL S}\\[0.2cm]
+    {05 MDL24CS012 Adwaitha P S}\\
+    {09 MDL24CS126 Alna Rebecca Siby}\\
+    {36 MDL24CS106 Jiya Mary Jacob}\\
+    {39 MDL24CS115 Joylin Alex}\\
+    {54 MDL24CS159 P Devananda}\\
+    {58 MDL24CS171 Riona Poly}\\
     }
+    \vspace{0.2cm}
     
     {\normalsize\textbf{Project Guide}}\\
-    {\normalsize\textbf{Maria Vijoy}}\\
+    {\normalsize\textbf{Athira S Nair}}\\
     {\small Assistant Professor}\\[0.1cm]
     
     \includegraphics[width=1cm]{college_logo}\\[0.1cm]
@@ -64,25 +67,380 @@
     Department of Computer Science and Engineering\\
     Model Engineering College, Thrikkakara}
   \end{center}
-}
 
 \title{CSD 415 PROJECT PHASE I PRESENTATION}
-\subtitle{FADEVEIL}
+\subtitle{LanChat}
 \author{Group 14}
 \date{November 4, 2024}
+}
 
 \begin{document}
 
+%Title slide
 \begin{frame}
   \titlepage
 \end{frame}
 
-\begin{frame}{Your Next Slide Title}
-  \begin{itemize}
-    \item Your content here
-    \item Add more bullet points
-    \item Continue with your presentation
-  \end{itemize}
+% Introduction/ Problem Statement slide
+\begin{frame}{Introduction/ Problem Statement}
+\small
+\vspace{0.2cm}
+\textbf{Problem Statement: }Most messaging platforms rely on internet access, making them unusable in settings with limited or no connectivity. In such environments like remote areas, internet-restricted workplaces, emergency or disaster zones, users lack a reliable way to communicate digitally in real time over a local network.
+\vspace{0.3cm}
+
+There is a growing need for a reliable real-time communication solution that does not rely on internet access. LANChat addresses this need by providing a messaging platform that operates entirely within a Local Area Network (LAN). This enables users in the same network to exchange messages securely and instantly, ensuring continued communication in offline or restricted settings.
 \end{frame}
 
+% Objectives slide 1
+\begin{frame}{Objectives}
+\small
+\vspace{0.2cm}
+\begin{itemize}
+   \item To enable Internet-free and seamless, real-time communication.
+   \item To enable instant communication between users connected to the same LAN network.
+   \item To create a lightweight and user-friendly chat interface suitable for small-scale environments.
+\end{itemize}
+\textbf{OOP Concepts}
+\begin{itemize}
+    \item Modularity -> 
+Backend is divided into clear layers — Controller, Service, and Repository
+    \item Maintainability and Scalability -> 
+The system is easy to update or extend
+    \item Reusability -> 
+Common service methods are reused across the application.
+\end{itemize}
+There are more OOP concepts such as
+\begin{itemize}
+    \item Abstraction
+    \item Encapsulation
+    \item Inheritance
+    \item Polymorphism
+\end{itemize}
+
+\end{frame}
+
+% Proposed System slide 1
+\begin{frame}{Proposed System}
+\small
+\vspace{0.2cm}
+
+1. \textbf{Overview}
+\vspace{0.2cm}
+
+A local network chat application with role-based access control (RBAC). Works offline within a LAN, enabling secure group communication.
+\vspace{0.2cm}
+
+2. \textbf{Components}
+\vspace{0.2cm}
+
+i) Client (Java Swing)
+\begin{itemize}
+    \item Desktop application with a simple chat UI
+    \item Connects to the server using the server’s local IP
+    \item Sends and receives messages via HTTP requests
+\end{itemize}
+
+ii) Server (Spring Boot + Embedded Tomcat)
+\begin{itemize}
+    \item REST API backend built using Spring Boot
+    \item Embedded Tomcat server handles HTTP communication
+    \item Provides endpoints for login, chat, group management, etc.
+\end{itemize}
+
+\end{frame}
+
+% Proposed System slide 2
+\begin{frame}{Proposed System contd...}
+\small
+\vspace{0.2cm}
+iii) Database (MySQL)
+\vspace{0.2cm} 
+
+Stores:
+\begin{itemize}
+   \item User credentials and roles (Admin, Moderator, Member)
+   \item Chat groups and memberships
+   \item Message history
+\end{itemize}
+3.\textbf{Key Features}
+\vspace{0.2cm} 
+
+\begin{itemize}
+   \item \textbf{RBAC (Role-Based Access Control):} Controls access to chat groups based on user roles
+   \item \textbf{LAN Communication (Offline):} No internet needed; works within a local network. Clients connect using the server's IP address
+   \item \textbf{Tomcat as Web Server:} Embedded in Spring Boot, handles all incoming HTTP requests from clients
+   \item \textbf{Multithreading for Real-Time Communication:} Each client connection is handled in a separate thread, ensuring responsiveness and supporting concurrent messaging.
+\end{itemize}
+
+\end{frame}
+\begin{frame}{OOP Concepts: Encapsulation and Inheritance}
+\small
+\begin{tabular}{>{\bfseries}p{3cm} p{4cm} p{6cm}}
+\toprule
+Concept & Usage & How It Is Used \\
+\midrule
+Encapsulation & \texttt{User}, \texttt{ChatMessage}, \texttt{DatabaseHandler} & Private fields (e.g., username, password) accessed through getters/setters. Prevents direct access to sensitive data. \\
+\addlinespace
+Inheritance & \texttt{User} → \texttt{AdminUser}; \texttt{Message} → \texttt{TextMessage}, \texttt{FileMessage}, \texttt{ImageMessage} & AdminUser inherits common user properties and adds admin actions. Different message types reuse common fields (sender, timestamp) from Message and add extra data (file path, image). \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% ----------------- Polymorphism & Abstraction -----------------
+\begin{frame}{OOP Concepts: Polymorphism and Abstraction}
+\small
+\begin{minipage}{0.99\linewidth}
+
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\bfseries}m{3.3cm} m{4.2cm} m{5.5cm}}
+\toprule
+Concept & Usage & How It Is Used \\
+\midrule
+Polymorphism & \texttt{MessageHandler} Interface, Implementations: \texttt{GroupMessageHandler}, \texttt{PrivateMessageHandler} & The same method \texttt{sendMessage()} behaves differently: \texttt{GroupMessageHandler} broadcasts to all group members, while \texttt{PrivateMessageHandler} sends to one user. Client code calls \texttt{handler.sendMessage()} without knowing the implementation. \\
+\addlinespace
+Abstraction & \texttt{MessageHandler} Interface & Hides message sending logic details. Provides a simple method \texttt{sendMessage()} for different chat types without exposing the underlying implementation. \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\end{frame}
+
+
+% Scope of the project
+\begin{frame}{Scope of LANChat}
+\small % Reduces overall font size for the slide
+
+\begin{itemize}
+    \setlength\itemsep{0.5em} % Slightly reduce spacing between items
+
+    \item Enable real-time text communication over a local area network using a client--server architecture.
+    \item Support both broadcast and private messaging between users.
+    \item Allows creation of multiple secure groups for different departments or teams.
+    \item Handle multiple simultaneous clients through multithreading.
+    \item Provide user identification and connection/disconnection notifications.
+    \item Incorporate basic error handling for network disruptions.
+    \item Offer scalability to operate over MANs and WANs.
+    \item Implement encryption for all message transmissions to ensure confidentiality and protect against unauthorized access.
+    \item Adaptable for use by emergency services, healthcare, corporate offices, education, defense, and disaster management.
+    \item Potential for encryption in highly confidential environments.
+\end{itemize}
+
+\end{frame}
+%Limitations of LANChat
+\begin{frame}
+\frametitle{Limitations}
+
+\begin{itemize}
+    \setlength\itemsep{1em} % Space between bullet points
+
+    \item Works only within the same connected network in the base version.
+    
+    \item Performance may be affected with a very large number of connected users.
+    
+    \item Requires that all devices be powered and connected to the network for communication to work.
+    
+    \item Dependent on the network infrastructure; failure of the server or network disrupts communication.
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+% Tools and Technologies slide 1
+\begin{frame}{Tools and Technologies Used in LANChat}
+\small
+\vspace{0.2cm}
+\textbf{Frontend (Client-Side)}
+\begin{itemize}
+  \item \textbf{Java Swing} – For building the desktop GUI (chat window, login page, etc.)
+  \item \textbf{HTTP Client (e.g., HttpURLConnection)} – To send HTTP requests to the backend
+\end{itemize}
+\vspace{0.2cm}
+\textbf{Backend (Server-Side)}
+\begin{itemize}
+  \item \textbf{Spring Boot} – Main backend framework that handles APIs, business logic, and connections
+  \item \textbf{Spring Web} – For creating RESTful endpoints
+  \item \textbf{Spring Data JPA} – For mapping Java objects to database records and simplifying data access
+  \item \textbf{Embedded Tomcat} – Lightweight web server built into Spring Boot
+\end{itemize}
+\vspace{0.2cm}
+\textbf{Database}
+\begin{itemize}
+  \item \textbf{MySQL} – Used to store user data, chat history, group details, and permissions
+  \item Accessed using Spring Data JPA from the backend
+\end{itemize}
+\end{frame}
+
+% Tools and Technologies slide 2
+\begin{frame}{Tools and Technologies contd...}
+\small
+\vspace{0.2cm}
+\textbf{Security and Access Control}
+\begin{itemize}
+  \item \textbf{Role-Based Access Control (RBAC)} – To restrict access to specific chat groups
+\end{itemize}
+\vspace{0.2cm}
+\textbf{Networking and Deployment}
+\begin{itemize}
+  \item \textbf{LAN (Offline)} – Communication is within a local network without internet
+  \item \textbf{IP Address-based Client Connection} – Clients connect using the server's local IP
+\end{itemize}
+\vspace{0.2cm}
+\textbf{Development and Tools}
+\begin{itemize}
+  \item \textbf{VS Code} – For development and debugging
+  \item \textbf{Maven } – For dependency and build management
+\end{itemize}
+\textbf{Most Critical Libraries}
+\begin{enumerate}
+    \item \texttt{javax.swing} – UI
+    \item \texttt{java.net.HttpURLConnection} – Sending requests from Swing
+    \item \texttt{spring-boot-starter-web} – REST API backend
+    \item \texttt{spring-boot-starter-data-jpa} – Database interaction
+    \item \texttt{mysql-connector-java} – MySQL support
+\end{enumerate}
+\end{frame}
+
+%Expected outcome silde 1
+\begin{frame}{Expected Outcome – LANChat Application}
+
+\small % Shrink text slightly to fit
+\textbf{Functional LAN-Based Messaging}
+\begin{itemize}
+    \item Real-time messaging over LAN/Wi-Fi
+    \item Works offline; no internet needed
+    \item Ideal for labs, hostels, offices, emergency zones
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{User Authentication}
+\begin{itemize}
+    \item Login with username and password
+    \item Only registered users allowed
+    \item Maintains privacy and identity
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Group Chat Support}
+\begin{itemize}
+    \item Join predefined or custom groups
+    \item Backend-managed groups
+    \item Based on departments, teams, floors
+\end{itemize}
+
+\end{frame}
+
+%Expected outcome silde 2
+\begin{frame}{Expected Outcome – LANChat Application}
+
+\small
+\textbf{Real-Time Communication}
+\begin{itemize}
+    \item Instant message delivery
+    \item Auto-refresh UI
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Client-Server Architecture}
+\begin{itemize}
+    \item Frontend: Java Swing
+    \item Backend: Spring Boot REST API
+    \item Communication via HTTP 
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Data Persistence with MySQL}
+\begin{itemize}
+    \item Stores users, chats, groups
+    \item Data retrieval on login
+    \item No loss after server restart
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Portability \& Ease of Use}
+\begin{itemize}
+    \item Server on any LAN-connected device
+    \item Plug-and-play setup
+\end{itemize}
+
+\end{frame}
+\begin{frame}{Project Timeline (4-5 Weeks)}
+\small
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Week 1: Planning \& Setup}
+    \begin{itemize}
+        \item Finalize features \& system design (architecture, DB schema).
+        \item Setup Java IDE, MySQL, LAN testing environment.
+        \item Practice basic Client-Server socket connection demo.
+    \end{itemize}
+
+    \item \textbf{Week 2: Core Backend Development}
+    \begin{itemize}
+        \item Build TCP Server (multi-client with threads).
+        \item Build Client for message sending/receiving.
+        \item Implement message broadcasting.
+        \item Test communication via console (no GUI yet).
+    \end{itemize}
+
+    \item \textbf{Week 3: Authentication \& Database Integration}
+    \begin{itemize}
+        \item Design DB (Users, Groups, Chat History).
+        \item Implement Login/Registration with DB (JDBC).
+        \item Store \& retrieve chat messages from DB.
+        \item Test authentication and secure access flow.
+    \end{itemize}
+
+\end{enumerate}
+
+\end{frame}
+
+% Continue next slide
+\begin{frame}{Project Timeline (4-5 Weeks) contd.}
+\small
+\begin{enumerate}
+    \setcounter{enumi}{3} % Continue numbering from 4
+    \item \textbf{Week 4: GUI \& Group Messaging}
+    \begin{itemize}
+        \item Design simple GUI (Login screen, chat window).
+        \item Link GUI with backend socket communication.
+        \item Implement group-based messaging and online user list.
+        \item Ensure full functionality via GUI.
+    \end{itemize}
+
+    \item \textbf{Week 5: Testing \& Finalization}
+    \begin{itemize}
+        \item Full system testing on LAN.
+        \item Handle disconnections, chat history load.
+        \item UI refinements, bug fixes.
+        \item Prepare report and demo presentation.
+    \end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Conclusion}
+
+\vspace{0.5cm}
+
+\textbf{LANChat} is a reliable, internet-free messaging platform built for Local Area Networks. Using Java Sockets, a Swing-based GUI, and secure user authentication, it offers seamless real-time chat even in offline environments. 
+\vspace{0.3cm}
+
+Currently, the scope of the project is limited to communication within LANs. However, in the future, it can be expanded to support communication over Metropolitan Area Networks (MANs) or Wide Area Networks (WANs) by leveraging private IP addressing and secure networking protocols
+\vspace{0.3cm}
+
+This project offers a practical communication solution for institutions while providing hands-on experience in networking concepts like multithreading, socket programming, and database integration. Its modular, portable design makes LANChat highly scalable. 
+
+\vspace{0.3cm}
+
+The completion of this project will serve as a practical demonstration of applying Object-Oriented Programming principles in solving real-world problems, while enhancing our technical proficiency in Java, networking, and database management.
+
+\end{frame}
+
+
 \end{document}
+
