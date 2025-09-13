@@ -142,6 +142,15 @@ class LoginPage extends JFrame {
         backButton.setFocusPainted(false);
         backButton.setBorder(new EmptyBorder(8, 20, 8, 20));
         backButton.addActionListener(e -> goBack());
+        JButton signupButton = new JButton("Sign Up");
+        signupButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        signupButton.setBackground(new Color(100, 180, 100));
+        signupButton.setForeground(Color.WHITE);
+        signupButton.setFocusPainted(false);
+        signupButton.setBorder(new EmptyBorder(8, 20, 8, 20));
+        signupButton.addActionListener(e -> openSignup());
+
+        buttonPanel.add(signupButton);
 
         buttonPanel.add(loginButton);
         buttonPanel.add(backButton);
@@ -217,5 +226,8 @@ class LoginPage extends JFrame {
     private void goBack() {
         new ServerConnectionPage().setVisible(true);
         this.dispose();
+    }
+    private void openSignup() {
+        new SignUpPage().setVisible(true);
     }
 }
