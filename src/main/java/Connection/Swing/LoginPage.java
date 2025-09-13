@@ -1,8 +1,17 @@
 package Connection.Swing;
 
+import database.DBConnection;
+import net.Connect;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,11 +20,11 @@ class LoginPage extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private String serverIP;
-    private Map<String, String> credentials;
+    //private Map<String, String> credentials;
 
     public LoginPage(String serverIP) {
         this.serverIP = serverIP;
-        initializeCredentials();
+        //initializeCredentials();
         setupUI();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(450, 450);
@@ -24,14 +33,14 @@ class LoginPage extends JFrame {
         setResizable(false);
     }
 
-    private void initializeCredentials() {
-        credentials = new HashMap<>();
-        credentials.put("admin", "admin123");
-        credentials.put("user1", "pass123");
-        credentials.put("user2", "pass456");
-        credentials.put("john", "john123");
-        credentials.put("jane", "jane456");
-    }
+//    private void initializeCredentials() {
+//        credentials = new HashMap<>();
+//        credentials.put("admin", "admin123");
+//        credentials.put("user1", "pass123");
+//        credentials.put("user2", "pass456");
+//        credentials.put("john", "john123");
+//        credentials.put("jane", "jane456");
+//    }
 
     private void setupUI() {
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -116,7 +125,15 @@ class LoginPage extends JFrame {
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
         loginButton.setBorder(new EmptyBorder(10, 25, 10, 25));
-        loginButton.addActionListener(e -> attemptLogin());
+        loginButton.addActionListener(e -> {
+            try {
+                attemptLogin();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         JButton backButton = new JButton("Back");
         backButton.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -145,7 +162,15 @@ class LoginPage extends JFrame {
         add(mainPanel);
 
         // Enter key support
-        passwordField.addActionListener(e -> attemptLogin());
+        passwordField.addActionListener(e -> {
+            try {
+                attemptLogin();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         // Request focus for username field when window opens
         SwingUtilities.invokeLater(() -> {
@@ -153,7 +178,8 @@ class LoginPage extends JFrame {
         });
     }
 
-    private void attemptLogin() {
+    private void attemptLogin() throws SQLException, ClassNotFoundException {
+
         String user = usernameField.getText().trim();
         String pass = new String(passwordField.getPassword());
 
@@ -162,15 +188,30 @@ class LoginPage extends JFrame {
             return;
         }
 
-        // Check credentials
-        if (credentials.containsKey(user) && credentials.get(user).equals(pass)) {
-            // Open chat page and close this window
-            new ChatPage(serverIP, user).setVisible(true);
-            this.dispose();
-        } else {
-            JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
-            passwordField.setText("");
+        try {
+            Connect connect = new Connect(serverIP, 888);
+            Socket socket = connect.getSocket();
+
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            out.println("LOGIN:" + user + ":" + pass);
+            String response = in.readLine();
+
+            if ("LOGIN_SUCCESS".equals(response)) {
+                new ChatPage(serverIP, user).setVisible(true);
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                passwordField.setText("");
+            }
+
+            connect.close();
+
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Could not connect to server: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
     private void goBack() {

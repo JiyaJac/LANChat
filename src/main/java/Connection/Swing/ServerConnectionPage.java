@@ -18,7 +18,7 @@ class ServerConnectionPage extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(500, 500);
         setLocationRelativeTo(null);
-        setTitle("LAN Chat - Server Connection");
+        setTitle("LAN Chat - Server DBConnection");
         setResizable(false);
     }
 
@@ -41,7 +41,7 @@ class ServerConnectionPage extends JFrame {
         contentPanel.add(Box.createVerticalStrut(20));
 
         // Subtitle
-        JLabel subtitleLabel = new JLabel("Server Connection");
+        JLabel subtitleLabel = new JLabel("Server DBConnection");
         subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         subtitleLabel.setForeground(new Color(100, 100, 100));
         subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -71,8 +71,7 @@ class ServerConnectionPage extends JFrame {
         JLabel portLabel = new JLabel("Enter Server port:");
         portLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         portLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        contentPanel.add(portLabel);
-        contentPanel.add(Box.createVerticalStrut(10));
+
 
         // Server port input field
         serverPortField = new JTextField("888");
@@ -86,6 +85,9 @@ class ServerConnectionPage extends JFrame {
         ));
 
         contentPanel.add(serverIPField);
+        contentPanel.add(Box.createVerticalStrut(15));
+        contentPanel.add(portLabel);
+        contentPanel.add(Box.createVerticalStrut(10));
         contentPanel.add(serverPortField);
         contentPanel.add(Box.createVerticalStrut(25));
 
@@ -160,7 +162,7 @@ class ServerConnectionPage extends JFrame {
             JOptionPane.showMessageDialog(
                     this,
                     "Could not connect to server at " + ip + ":" + port,
-                    "Connection Failed",
+                    "DBConnection Failed",
                     JOptionPane.ERROR_MESSAGE
             );
         }

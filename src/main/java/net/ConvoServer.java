@@ -1,13 +1,17 @@
 package net;
 
-
+import database.DBConnection;
 import java.io.*;
 import java.net.*;
+import java.sql.SQLException;
+import java.util.*;
 
 public class ConvoServer {
-    public static void main(String args[])
-            throws Exception
-    {
+
+    // Store connected clients
+    private static final Map<String, PrintStream> clientOutputs = new HashMap<>();
+
+    public static void main(String args[]) {
         try (ServerSocket server = new ServerSocket(888)) {
             System.out.println("Server started on port 888...");
 
@@ -23,33 +27,49 @@ public class ConvoServer {
         }
     }
 
-    // Function to handle a single client
     private static void handleClient(Socket s) {
         try (
-                //to send data to the client
                 PrintStream ps = new PrintStream(s.getOutputStream());
-
-                //to read data from the client
-                BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-
-                // to read data from the keyboard
-                BufferedReader kb = new BufferedReader(new InputStreamReader(System.in));
+                BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()))
         ) {
-            while (true) {
-                String str, str1;
+            String line;
+            String username = null;
 
-                // repeat as long as the client
-                // does not send a null string
-                // read from client
-                while ((str = br.readLine()) != null) {
-                    System.out.println(str);
-                    str1 = kb.readLine();
-                    // send to client
-                    ps.println(str1);
+            while ((line = br.readLine()) != null) {
+                System.out.println("Received: " + line);
+
+                // Handle login
+                if (line.startsWith("LOGIN:")) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 3) {
+                        String user = parts[1];
+                        String pass = parts[2];
+
+                        DBConnection db = new DBConnection();
+                        db.fetchUsers();
+
+                        if (db.userCredentials.containsKey(user) &&
+                                db.userCredentials.get(user).equals(pass)) {
+                            ps.println("LOGIN_SUCCESS");   //  reply to client
+                            username = user;
+                            clientOutputs.put(username, ps);
+                            System.out.println("✅ Login success for " + user);
+                        } else {
+                            ps.println("LOGIN_FAILED");    //  reply to client
+                            System.out.println("❌ Login failed for " + user);
+                        }
+                    } else {
+                        ps.println("LOGIN_FAILED");        // wrong format
+                    }
                 }
 
+                // Handle chat messages
+//                else if (line.startsWith("MSG:") && username != null) {
+//                    String msg = line.substring(4); // message after "MSG:"
+//                    broadcast(username + ": " + msg, username);
+//                }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException | SQLException e) {
             System.out.println("⚠️ Client disconnected: " + s.getInetAddress());
         } finally {
             try {
@@ -57,35 +77,13 @@ public class ConvoServer {
             } catch (IOException ignored) {}
         }
     }
+
+    // Broadcast a message to all clients except sender
+    private static void broadcast(String message, String sender) {
+        for (Map.Entry<String, PrintStream> entry : clientOutputs.entrySet()) {
+            if (!entry.getKey().equals(sender)) {
+                entry.getValue().println(message);
+            }
+        }
+    }
 }
-
-
-//
-//        // server executes continuously
-//        while (true) {
-//            String str, str1;
-//
-//            // repeat as long as the client
-//            // does not send a null string
-//            // read from client
-//            while ((str = br.readLine()) != null) {
-//                System.out.println(str);
-//                str1 = kb.readLine();
-//                // send to client
-//                ps.println(str1);
-//            }
-//
-//            // close connection
-//            ps.close();
-//            br.close();
-//            kb.close();
-//            ss.close();
-//            s.close();
-//
-//            // terminate application
-//            System.exit(0);
-//
-//        } // end of while
-//    }
-//}
-

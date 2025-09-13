@@ -1,9 +1,11 @@
 package database;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
-public class Connection {
+public class DBConnection {
     // Database URL, username, and password
 
     // Replace with your database name
@@ -19,11 +21,13 @@ public class Connection {
     String query1 = "SELECT * FROM USERS";
 //        String query2="INSERT INTO STUDENTS (id,name) VALUES (0,'orion')";
 
-    Vector<String> password_list = new Vector<>();
-    Vector<String> users_list = new Vector<>();
+    public Map<String, String> userCredentials = new HashMap<>();
 
-    // Establish JDBC Connection
-    public void fetchUsers() {
+    // Establish JDBC DBConnection
+    public void fetchUsers() throws ClassNotFoundException, SQLException {
+        ResultSet rs;
+        Statement st;
+        Connection c;
         try {
 
             // Load Type-4 Driver
@@ -31,36 +35,40 @@ public class Connection {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             // Establish connection
-            java.sql.Connection c = DriverManager.getConnection(
+            c = DriverManager.getConnection(
                     url, username, password);
 
             // Create a statement
-            Statement st = c.createStatement();
+            st = c.createStatement();
 
 //            int count=st.executeUpdate(query2);
 //            System.out.println(count+"rows changed");
 
             // Execute the query1
-            ResultSet rs = st.executeQuery(query1);
+            rs = st.executeQuery(query1);
 
             // Process result set
             while (rs.next()) {
-                // Assuming STUDENTS table has id, name, age columns
-                String pswd = rs.getString("password");
-                password_list.add(pswd);
                 String name = rs.getString("user_name");
-                users_list.add(name);
+                String pswd = rs.getString("password");
+                userCredentials.put(name, pswd);
             }
-
-            // Close the connection
-            rs.close();
-            st.close();
-            c.close();
-            System.out.println("Connection closed.");
-        } catch (ClassNotFoundException e) {
-            System.err.println("JDBC Driver not found: " + e.getMessage());
-        } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
         }
+
+        // Close the connection
+        rs.close();
+        st.close();
+        c.close();
+        System.out.println("DBConnection closed.");
     }
 }
+
+//    } catch (ClassNotFoundException e) {
+//            System.err.println("JDBC Driver not found: " + e.getMessage());
+//        } catch (SQLException e) {
+//            System.err.println("SQL Error: " + e.getMessage());
+//        }
+//    }
+//}
