@@ -1,36 +1,47 @@
 package net;
+import server.ChatServer;
 
-import database.DBConnection;
 import java.io.*;
 import java.net.*;
 import java.sql.SQLException;
 import java.util.*;
 
+import static server.ChatServer.*;
+
 public class ConvoServer {
 
     // Store connected clients
-    private static final Map<String, PrintStream> clientOutputs = new HashMap<>();
+    public static final Map<String, PrintStream> clientOutputs = new HashMap<>();
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws SQLException, ClassNotFoundException {
+        ChatServer svr=new ChatServer();
         try (ServerSocket server = new ServerSocket(888)) {
             System.out.println("Server started on port 888...");
 
             while (true) {
-                Socket clientSocket = server.accept();
-                System.out.println("New client connected: " + clientSocket.getInetAddress());
+                Socket socket = server.accept();
+                System.out.println("New client connected: " + socket.getInetAddress());
 
                 // Handle each client in a new thread
-                new Thread(() -> handleClient(clientSocket)).start();
+                new Thread(() -> {
+                    try {
+                        handleClient(socket,svr);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void handleClient(Socket s) {
+    private static void handleClient(Socket socket,ChatServer svr) throws SQLException, ClassNotFoundException {
         try (
-                PrintStream ps = new PrintStream(s.getOutputStream());
-                BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()))
+                PrintStream ps = new PrintStream(socket.getOutputStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))
         ) {
             String line;
             String username = null;
@@ -40,50 +51,33 @@ public class ConvoServer {
 
                 // Handle login
                 if (line.startsWith("LOGIN:")) {
-                    String[] parts = line.split(":");
-                    if (parts.length == 3) {
-                        String user = parts[1];
-                        String pass = parts[2];
+                    username=svr.login(line, ps);
 
-                        DBConnection db = new DBConnection();
-                        db.fetchUsers();
+                }
 
-                        if (db.userCredentials.containsKey(user) &&
-                                db.userCredentials.get(user).equals(pass)) {
-                            ps.println("LOGIN_SUCCESS");   //  reply to client
-                            username = user;
-                            clientOutputs.put(username, ps);
-                            System.out.println("✅ Login success for " + user);
-                        } else {
-                            ps.println("LOGIN_FAILED");    //  reply to client
-                            System.out.println("❌ Login failed for " + user);
-                        }
+                //Handle signup
+                if (line.startsWith("SIGNUP:")){
+                    username=svr.signup(line,ps);
+
+                }
+
+                else if (line.startsWith("MSG:")) {
+                    if (username != null) {
+                        String msg = line.substring(4);
+                        broadcast("MSG:"+ msg, username);
                     } else {
-                        ps.println("LOGIN_FAILED");        // wrong format
+                        ps.println("⚠️ Please login first.");
                     }
                 }
 
-                // Handle chat messages
-//                else if (line.startsWith("MSG:") && username != null) {
-//                    String msg = line.substring(4); // message after "MSG:"
-//                    broadcast(username + ": " + msg, username);
-//                }
-            }
-        } catch (IOException | ClassNotFoundException | SQLException e) {
-            System.out.println("⚠️ Client disconnected: " + s.getInetAddress());
-        } finally {
-            try {
-                s.close();
-            } catch (IOException ignored) {}
-        }
-    }
 
-    // Broadcast a message to all clients except sender
-    private static void broadcast(String message, String sender) {
-        for (Map.Entry<String, PrintStream> entry : clientOutputs.entrySet()) {
-            if (!entry.getKey().equals(sender)) {
-                entry.getValue().println(message);
             }
+        } catch (Exception e) {
+            System.out.println("⚠️ Client disconnected: " + socket.getInetAddress());
+        } finally{
+            removeClient(socket);
         }
     }
 }
+
+

@@ -3,72 +3,52 @@ package database;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 public class DBConnection {
-    // Database URL, username, and password
+    private Connection c;
+    private Statement st;
+    private ResultSet rs;
 
-    // Replace with your database name
-    String url = "jdbc:mysql://localhost:3306/lanchat";
-
-    // Replace with your MySQL username
-    String username = "root";
-
-    // Replace with your MySQL password
-    String password = "hehehehe";
-
-    // Updated query1 syntax for modern databases
-    String query1 = "SELECT * FROM USERS";
-//        String query2="INSERT INTO STUDENTS (id,name) VALUES (0,'orion')";
+    private final String url = "jdbc:mysql://localhost:3306/lanchat";
+    private final String username = "root";
+    private final String password = "hehehehe";
 
     public Map<String, String> userCredentials = new HashMap<>();
 
-    // Establish JDBC DBConnection
-    public void fetchUsers() throws ClassNotFoundException, SQLException {
-        ResultSet rs;
-        Statement st;
-        Connection c;
-        try {
+    // Constructor: load driver + establish connection
+    public DBConnection() throws ClassNotFoundException, SQLException {
+        // Load Type-4 MySQL driver
+        Class.forName("com.mysql.cj.jdbc.Driver");
 
-            // Load Type-4 Driver
-            // MySQL Type-4 driver class
-            Class.forName("com.mysql.cj.jdbc.Driver");
+        // Establish connection
+        c = DriverManager.getConnection(url, username, password);
 
-            // Establish connection
-            c = DriverManager.getConnection(
-                    url, username, password);
-
-            // Create a statement
-            st = c.createStatement();
-
-//            int count=st.executeUpdate(query2);
-//            System.out.println(count+"rows changed");
-
-            // Execute the query1
-            rs = st.executeQuery(query1);
-
-            // Process result set
-            while (rs.next()) {
-                String name = rs.getString("user_name");
-                String pswd = rs.getString("password");
-                userCredentials.put(name, pswd);
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        // Close the connection
-        rs.close();
-        st.close();
-        c.close();
-        System.out.println("DBConnection closed.");
+        // Create a statement
+        st = c.createStatement();
     }
-}
 
-//    } catch (ClassNotFoundException e) {
-//            System.err.println("JDBC Driver not found: " + e.getMessage());
-//        } catch (SQLException e) {
-//            System.err.println("SQL Error: " + e.getMessage());
+
+    public Connection getC() {
+        return c;
+    }
+
+
+    // Fetch all users into userCredentials
+//    public void fetchUsers() throws SQLException {
+//        String query1 = "SELECT * FROM USERS";
+//
+//        try {
+//            rs = st.executeQuery(query1);
+//
+//            // Process result set
+//            while (rs.next()) {
+//                String name = rs.getString("user_name");
+//                String pswd = rs.getString("password");
+//                userCredentials.put(name, pswd);
+//            }
+//        } finally {
+//            // Always close result set
+//            if (rs != null) rs.close();
 //        }
 //    }
-//}
+}

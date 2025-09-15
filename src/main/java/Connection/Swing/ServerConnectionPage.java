@@ -137,7 +137,7 @@ class ServerConnectionPage extends JFrame {
         // Simulate connection attempt
         try {
             // Try to connect to server
-            Connect c = new Connect(ip, port); // Assuming this internally opens a Socket
+            Connect connect = new Connect(ip, port); // Assuming this internally opens a Socket
 
             // If no exception → connection established
             JDialog connectDialog = new JDialog(this, "Connecting...", true);
@@ -149,7 +149,7 @@ class ServerConnectionPage extends JFrame {
 
             Timer timer = new Timer(1500, e -> {
                 connectDialog.dispose();
-                new LoginPage(ip).setVisible(true);
+                new LoginPage(connect).setVisible(true);
                 this.dispose();
             });
             timer.setRepeats(false);

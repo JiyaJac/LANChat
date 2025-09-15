@@ -1,29 +1,44 @@
 package Connection.Swing;
 
+import net.Connect;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.*;
 
 public class ChatPage extends JFrame {
 
-    private String serverIP;
+    private Connect connect;
     private String username;
     private JList<String> userList;
     private DefaultListModel<String> userListModel;
     private JTextArea chatArea;
     private JTextField messageField;
+    private PrintStream ps;
 
-    public ChatPage(String serverIP, String username) {
-        this.serverIP = serverIP;
+    public ChatPage(Connect connect, String username) {
+        this.connect = connect;
         this.username = username;
+
+        try {
+            // Create PrintStream for sending messages
+            ps = new PrintStream(connect.getSocket().getOutputStream(), true);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error setting up connection: " + e.getMessage(),
+                    "Connection Error", JOptionPane.ERROR_MESSAGE);
+        }
+
         setupUI();
         initializeChat();
+        startMessageListener();
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 650);
         setLocationRelativeTo(null);
-        setTitle("LAN Chat - " + username + " @ " + serverIP);
+        setTitle("LAN Chat - " + username + " @ " + this.connect);
 
         // Handle window closing
         addWindowListener(new WindowAdapter() {
@@ -52,7 +67,7 @@ public class ChatPage extends JFrame {
         chatTitle.setForeground(Color.WHITE);
         chatTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel serverLabel = new JLabel("Server: " + serverIP);
+        JLabel serverLabel = new JLabel("Server: " + connect);
         serverLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         serverLabel.setForeground(new Color(220, 220, 220));
         serverLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -82,7 +97,7 @@ public class ChatPage extends JFrame {
         usersPanel.setBackground(new Color(248, 250, 255));
         usersPanel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                "Online Users (5)",
+                "Online Users",
                 0, 0,
                 new Font("Arial", Font.BOLD, 12),
                 new Color(60, 90, 150)
@@ -93,7 +108,6 @@ public class ChatPage extends JFrame {
         userList = new JList<>(userListModel);
         userList.setFont(new Font("Arial", Font.PLAIN, 13));
         userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        userList.setCellRenderer(new UserListCellRenderer());
 
         JScrollPane userScrollPane = new JScrollPane(userList);
         userScrollPane.setPreferredSize(new Dimension(200, 0));
@@ -159,55 +173,25 @@ public class ChatPage extends JFrame {
     }
 
     private void initializeChat() {
-        // Populate user list with mock users
+        // Clear and add self to user list
         userListModel.clear();
-        userListModel.addElement("● " + username + " (You)");
-        userListModel.addElement("● John Doe");
-        userListModel.addElement("● Jane Smith");
-        userListModel.addElement("● Mike Johnson");
-        userListModel.addElement("● Sarah Wilson");
+        userListModel.addElement(username + " (You)");
 
-        // Add welcome messages
+        // Welcome text
         chatArea.setText("=== LAN Chat Room ===\n");
-        chatArea.append("Server: " + serverIP + "\n");
+        chatArea.append("Server: " + connect + "\n");
         chatArea.append("Connected as: " + username + "\n");
         chatArea.append("========================\n\n");
 
-        // Simulate some initial messages
         addMessage("System", "Welcome to the chat room, " + username + "!");
-        addMessage("John Doe", "Hey everyone! 👋");
-        addMessage("Jane Smith", "Welcome " + username + "! How are you doing?");
-
         messageField.requestFocus();
     }
 
     private void sendMessage() {
         String message = messageField.getText().trim();
-        if (!message.isEmpty()) {
-            addMessage(username, message);
+        if (!message.isEmpty() && ps != null) {
+            ps.println("MSG:" + username + ":" + message); // send to server
             messageField.setText("");
-
-            // Simulate responses from other users
-            Timer timer = new Timer(1500 + (int) (Math.random() * 2000), e -> {
-                String[] responses = {
-                        "That's interesting! 🤔",
-                        "I agree with you completely.",
-                        "Thanks for sharing that!",
-                        "Good point! 👍",
-                        "How's everyone doing today?",
-                        "Has anyone seen the latest news?",
-                        "Working on anything exciting?",
-                        "Great to have you here!",
-                        "LOL! 😂",
-                        "That reminds me of something..."
-                };
-                String[] users = {"John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson"};
-                String randomUser = users[(int) (Math.random() * users.length)];
-                String randomResponse = responses[(int) (Math.random() * responses.length)];
-                addMessage(randomUser, randomResponse);
-            });
-            timer.setRepeats(false);
-            timer.start();
         }
     }
 
@@ -229,6 +213,42 @@ public class ChatPage extends JFrame {
         });
     }
 
+    private void startMessageListener() {
+        new Thread(() -> {
+            try {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(connect.getSocket().getInputStream())
+                );
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("MSG:")) {
+                        String[] parts = line.split(":", 3);
+                        if (parts.length >= 3) {
+                            String sender = parts[1];
+                            String msg = parts[2];
+                            addMessage(sender, msg);
+                        }
+                    } else if (line.startsWith("ONLINE:")) {
+                        // update online users
+                        String[] users = line.substring(7).split(",");
+                        SwingUtilities.invokeLater(() -> {
+                            userListModel.clear();
+                            for (String u : users) {
+                                if (u.equals(username)) {
+                                    userListModel.addElement(u + " (You)");
+                                } else {
+                                    userListModel.addElement(u);
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (IOException e) {
+                addMessage("System", "Disconnected from server.");
+            }
+        }).start();
+    }
+
     private void logout() {
         int choice = JOptionPane.showConfirmDialog(
                 this,
@@ -239,6 +259,9 @@ public class ChatPage extends JFrame {
         );
 
         if (choice == JOptionPane.YES_OPTION) {
+            if (ps != null) {
+                ps.println("LOGOUT:" + username);
+            }
             new ServerConnectionPage().setVisible(true);
             this.dispose();
         }
