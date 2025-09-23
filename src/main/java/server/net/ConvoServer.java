@@ -1,5 +1,10 @@
-package net;
+package server.net;
+
+
+
 import server.ChatServer;
+import server.messages.GroupMessage;
+import server.messages.PrivateMessage;
 
 import java.io.*;
 import java.net.*;
@@ -61,16 +66,47 @@ public class ConvoServer {
 
                 }
 
+                if (line.startsWith("LOGOUT:")){
+                    svr.logout(line,ps);
+
+                }
+
                 else if (line.startsWith("MSG:")) {
                     if (username != null) {
-                        String msg = line.substring(4);
-                        broadcast("MSG:"+ msg, username);
+                        // Format is "PRIVATE:<sender>:<recipient>:<message>"
+                        String[] parts = line.split(":", 3);
+                        if (parts.length >= 3) {
+                            String sender = parts[1];
+                            String msg = parts[2];
+
+                            GroupMessage grp = new GroupMessage(sender, msg);
+                            grp.send();
+                        } else {
+                            ps.println("⚠️ Invalid group message format.");
+                        }
                     } else {
                         ps.println("⚠️ Please login first.");
                     }
                 }
 
+                else if (line.startsWith("PRIVATE:")) {
+                    if (username != null) {
+                        // Format is "PRIVATE:<sender>:<recipient>:<message>"
+                        String[] parts = line.split(":", 4);
+                        if (parts.length >= 4) {
+                            String sender = parts[1];
+                            String recipient = parts[2];
+                            String msg = parts[3];
 
+                            PrivateMessage prv = new PrivateMessage(sender, recipient, msg);
+                            prv.send();
+                        } else {
+                            ps.println("⚠️ Invalid private message format.");
+                        }
+                    } else {
+                        ps.println("⚠️ Please login first.");
+                    }
+                }
             }
         } catch (Exception e) {
             System.out.println("⚠️ Client disconnected: " + socket.getInetAddress());

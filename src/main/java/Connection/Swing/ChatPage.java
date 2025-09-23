@@ -1,30 +1,33 @@
 package Connection.Swing;
 
-import net.Connect;
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ChatPage extends JFrame {
+
+public class ChatPage extends UITheme {
 
     private Connect connect;
     private String username;
     private JList<String> userList;
     private DefaultListModel<String> userListModel;
-    private JTextArea chatArea;
-    private JTextField messageField;
     private PrintStream ps;
 
+    private JTabbedPane chatTabs;
+    private Map<String, ChatPanel> privateChatTabs = new HashMap<>();
+
     public ChatPage(Connect connect, String username) {
+        super("LAN Chat - " + username + "@" + connect, 900, 650);
         this.connect = connect;
         this.username = username;
 
         try {
-            // Create PrintStream for sending messages
             ps = new PrintStream(connect.getSocket().getOutputStream(), true);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error setting up connection: " + e.getMessage(),
@@ -35,12 +38,6 @@ public class ChatPage extends JFrame {
         initializeChat();
         startMessageListener();
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(900, 650);
-        setLocationRelativeTo(null);
-        setTitle("LAN Chat - " + username + " @ " + this.connect);
-
-        // Handle window closing
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -57,7 +54,6 @@ public class ChatPage extends JFrame {
         headerPanel.setBackground(new Color(60, 90, 150));
         headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
 
-        // Left side of header
         JPanel leftHeaderPanel = new JPanel();
         leftHeaderPanel.setLayout(new BoxLayout(leftHeaderPanel, BoxLayout.Y_AXIS));
         leftHeaderPanel.setBackground(new Color(60, 90, 150));
@@ -75,7 +71,6 @@ public class ChatPage extends JFrame {
         leftHeaderPanel.add(chatTitle);
         leftHeaderPanel.add(serverLabel);
 
-        // Logout button
         JButton logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("Arial", Font.PLAIN, 12));
         logoutButton.setBackground(new Color(180, 70, 70));
@@ -113,107 +108,65 @@ public class ChatPage extends JFrame {
         userScrollPane.setPreferredSize(new Dimension(200, 0));
         usersPanel.add(userScrollPane, BorderLayout.CENTER);
 
-        // Chat panel
-        JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                "Chat Messages",
-                0, 0,
-                new Font("Arial", Font.BOLD, 12),
-                new Color(60, 90, 150)
-        ));
+        // Tabs for chats
+        chatTabs = new JTabbedPane();
+        ChatPanel groupPanel = new ChatPanel(null); // null recipient = group chat
+        chatTabs.addTab("Group Chat", groupPanel);
 
-        // Chat area
-        chatArea = new JTextArea();
-        chatArea.setFont(new Font("Consolas", Font.PLAIN, 13));
-        chatArea.setEditable(false);
-        chatArea.setLineWrap(true);
-        chatArea.setWrapStyleWord(true);
-        chatArea.setBackground(new Color(250, 250, 250));
+        userList.addListSelectionListener(e -> {
+            String selectedUser = userList.getSelectedValue();
+            if (selectedUser != null && !selectedUser.endsWith("(You)")) {
+                openPrivateTab(selectedUser);
+            }
+        });
 
-        JScrollPane chatScrollPane = new JScrollPane(chatArea);
-        chatScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        chatPanel.add(chatScrollPane, BorderLayout.CENTER);
-
-        // Message input panel
-        JPanel messagePanel = new JPanel(new BorderLayout());
-        messagePanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                "Send Message",
-                0, 0,
-                new Font("Arial", Font.BOLD, 11),
-                new Color(60, 90, 150)
-        ));
-
-        messageField = new JTextField();
-        messageField.setFont(new Font("Arial", Font.PLAIN, 13));
-        messageField.setPreferredSize(new Dimension(400, 35));
-        messageField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                new EmptyBorder(8, 10, 8, 10)
-        ));
-        messageField.addActionListener(e -> sendMessage());
-
-        JButton sendButton = new JButton("Send");
-        sendButton.setFont(new Font("Arial", Font.BOLD, 12));
-        sendButton.setBackground(new Color(70, 130, 180));
-        sendButton.setForeground(Color.WHITE);
-        sendButton.setFocusPainted(false);
-        sendButton.setBorder(new EmptyBorder(8, 20, 8, 20));
-        sendButton.addActionListener(e -> sendMessage());
-
-        messagePanel.add(messageField, BorderLayout.CENTER);
-        messagePanel.add(sendButton, BorderLayout.EAST);
-        chatPanel.add(messagePanel, BorderLayout.SOUTH);
-
-        // Add panels to main content
         mainContentPanel.add(usersPanel, BorderLayout.WEST);
-        mainContentPanel.add(chatPanel, BorderLayout.CENTER);
+        mainContentPanel.add(chatTabs, BorderLayout.CENTER);
         add(mainContentPanel, BorderLayout.CENTER);
     }
 
     private void initializeChat() {
-        // Clear and add self to user list
         userListModel.clear();
         userListModel.addElement(username + " (You)");
-
-        // Welcome text
-        chatArea.setText("=== LAN Chat Room ===\n");
-        chatArea.append("Server: " + connect + "\n");
-        chatArea.append("Connected as: " + username + "\n");
-        chatArea.append("========================\n\n");
-
-        addMessage("System", "Welcome to the chat room, " + username + "!");
-        messageField.requestFocus();
+        addMessageToGroup("System", "Welcome to the chat room, " + username + "!");
     }
 
-    private void sendMessage() {
-        String message = messageField.getText().trim();
-        if (!message.isEmpty() && ps != null) {
-            ps.println("MSG:" + username + ":" + message); // send to server
-            messageField.setText("");
+    private void openPrivateTab(String user) {
+        if (!privateChatTabs.containsKey(user)) {
+            ChatPanel privatePanel = new ChatPanel(user);
+            chatTabs.addTab(user, privatePanel);
+            privateChatTabs.put(user, privatePanel);
+
+            // Add close button to tab
+            int index = chatTabs.indexOfComponent(privatePanel);
+            chatTabs.setTabComponentAt(index, makeClosableTab(user, privatePanel));
         }
+        chatTabs.setSelectedComponent(privateChatTabs.get(user));
+        resetTabTitle(user);
     }
 
-    public void addMessage(String sender, String message) {
-        SwingUtilities.invokeLater(() -> {
-            String timestamp = java.time.LocalTime.now().format(
-                    java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")
-            );
+    private JPanel makeClosableTab(String title, Component tabContent) {
+        JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        tabPanel.setOpaque(false);
 
-            String formattedMessage;
-            if (sender.equals("System")) {
-                formattedMessage = String.format("[%s] *** %s ***\n", timestamp, message);
-            } else {
-                formattedMessage = String.format("[%s] %s: %s\n", timestamp, sender, message);
+        JLabel label = new JLabel(title);
+        JButton closeBtn = new JButton("x");
+        closeBtn.setFont(new Font("Arial", Font.BOLD, 10));
+        closeBtn.setMargin(new Insets(0, 2, 0, 2));
+        closeBtn.addActionListener(e -> {
+            int i = chatTabs.indexOfComponent(tabContent);
+            if (i >= 0) {
+                chatTabs.remove(i);
+                privateChatTabs.remove(title);
             }
-
-            chatArea.append(formattedMessage);
-            chatArea.setCaretPosition(chatArea.getDocument().getLength());
         });
+
+        tabPanel.add(label);
+        tabPanel.add(closeBtn);
+        return tabPanel;
     }
 
-    private void startMessageListener() {
+    public void startMessageListener() {
         new Thread(() -> {
             try {
                 BufferedReader reader = new BufferedReader(
@@ -226,10 +179,41 @@ public class ChatPage extends JFrame {
                         if (parts.length >= 3) {
                             String sender = parts[1];
                             String msg = parts[2];
-                            addMessage(sender, msg);
+                            addMessageToGroup(sender, msg);
                         }
-                    } else if (line.startsWith("ONLINE:")) {
-                        // update online users
+                    } else if (line.startsWith("PRIVATE:")) {
+                        String[] parts = line.split(":", 4);
+                        if (parts.length >= 4) {
+                            String sender = parts[1];
+                            String recipient = parts[2];
+                            String msg = parts[3];
+
+                            String tabKey = sender.equals(username) ? recipient : sender;
+
+                            SwingUtilities.invokeLater(() -> {
+                                openPrivateTab(tabKey);
+                                privateChatTabs.get(tabKey).addMessage(sender, msg);
+
+                                // Add notification (*) if tab is not active
+                                if (chatTabs.getSelectedComponent() != privateChatTabs.get(tabKey)) {
+                                    addNotification(tabKey);
+                                }
+                            });
+                        }
+                    }
+                    else if (line.startsWith("PRIVATE_SYS:")) {
+                        String[] parts = line.split(":", 3);
+                        String sender = parts[1];   // The user who logged out
+                        String msg = parts[2];      // "has logged out"
+
+                        // Show in the private tab with that user if exists
+                        SwingUtilities.invokeLater(() -> {
+                            if (privateChatTabs.containsKey(sender)) {
+                                privateChatTabs.get(sender).addMessage("System", msg);
+                            }
+                        });
+                    }
+                    else if (line.startsWith("ONLINE:")) {
                         String[] users = line.substring(7).split(",");
                         SwingUtilities.invokeLater(() -> {
                             userListModel.clear();
@@ -244,9 +228,31 @@ public class ChatPage extends JFrame {
                     }
                 }
             } catch (IOException e) {
-                addMessage("System", "Disconnected from server.");
+                addMessageToGroup("System", "Disconnected from server.");
             }
         }).start();
+    }
+
+    private void addNotification(String user) {
+        int index = chatTabs.indexOfComponent(privateChatTabs.get(user));
+        if (index >= 0) {
+            String title = chatTabs.getTitleAt(index);
+            if (!title.endsWith("*")) {
+                chatTabs.setTitleAt(index, title + "*");
+            }
+        }
+    }
+
+    private void resetTabTitle(String user) {
+        int index = chatTabs.indexOfComponent(privateChatTabs.get(user));
+        if (index >= 0) {
+            chatTabs.setTitleAt(index, user);
+        }
+    }
+
+    private void addMessageToGroup(String sender, String message) {
+        ChatPanel groupPanel = (ChatPanel) chatTabs.getComponentAt(0);
+        groupPanel.addMessage(sender, message);
     }
 
     private void logout() {
@@ -261,9 +267,69 @@ public class ChatPage extends JFrame {
         if (choice == JOptionPane.YES_OPTION) {
             if (ps != null) {
                 ps.println("LOGOUT:" + username);
+                ps.flush();
             }
+            if (userListModel != null) userListModel.removeElement(username);
+
+            for (String u : privateChatTabs.keySet()) {
+                privateChatTabs.get(u).addMessage("System", username + " has logged out.");
+            }
+
             new ServerConnectionPage().setVisible(true);
             this.dispose();
+        }
+    }
+
+    // Inner class for a single chat panel
+    private class ChatPanel extends JPanel {
+        private JTextArea chatArea;
+        private JTextField messageField;
+        private String recipient; // null = group chat
+
+        public ChatPanel(String recipient) {
+            super(new BorderLayout());
+            this.recipient = recipient;
+
+            chatArea = new JTextArea();
+            chatArea.setEditable(false);
+            chatArea.setLineWrap(true);
+            chatArea.setWrapStyleWord(true);
+            chatArea.setBackground(new Color(250, 250, 250));
+            JScrollPane scrollPane = new JScrollPane(chatArea);
+            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            add(scrollPane, BorderLayout.CENTER);
+
+            JPanel messagePanel = new JPanel(new BorderLayout());
+            messageField = new JTextField();
+            messageField.addActionListener(e -> sendMessage());
+            JButton sendButton = new JButton("Send");
+            sendButton.addActionListener(e -> sendMessage());
+            messagePanel.add(messageField, BorderLayout.CENTER);
+            messagePanel.add(sendButton, BorderLayout.EAST);
+
+            add(messagePanel, BorderLayout.SOUTH);
+        }
+
+        public void sendMessage() {
+            String msg = messageField.getText().trim();
+            if (msg.isEmpty() || ps == null) return;
+
+            if (recipient == null) {
+                ps.println("MSG:" + username + ":" + msg);
+            } else {
+                ps.println("PRIVATE:" + username + ":" + recipient + ":" + msg);
+            }
+            messageField.setText("");
+        }
+
+        public void addMessage(String sender, String msg) {
+            SwingUtilities.invokeLater(() -> {
+                String timestamp = java.time.LocalTime.now().format(
+                        java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")
+                );
+                chatArea.append(String.format("[%s] %s: %s\n", timestamp, sender, msg));
+                chatArea.setCaretPosition(chatArea.getDocument().getLength());
+            });
         }
     }
 }

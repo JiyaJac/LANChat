@@ -1,6 +1,7 @@
 package server;
 
-import database.DBConnection;
+import server.database.DBConnection;
+import server.messages.GroupMessage;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -8,15 +9,12 @@ import java.net.Socket;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import static net.ConvoServer.clientOutputs;
+
+import static server.net.ConvoServer.clientOutputs;
 
 
 public class ChatServer{
-    Set<String> s = new TreeSet<>();
-    HashMap<String, PrivateRoom> mappings = new HashMap<>();
     DBConnection db;
 
     public ChatServer() throws SQLException, ClassNotFoundException {
@@ -70,7 +68,7 @@ public class ChatServer{
 
 
 
-    public String signup(String line, PrintStream ps) throws SQLException, ClassNotFoundException {
+    public String signup(String line, PrintStream ps) throws SQLException {
         String[] parts = line.split(":");
         if (parts.length == 3) {
             String user = parts[1];
@@ -96,6 +94,7 @@ public class ChatServer{
                     insertStmt.executeUpdate();
 
                     ps.println("SIGNUP_SUCCESS"); // ✅ tell client
+                    broadcastOnlineUsers();
                     System.out.println("✅ New user registered: " + user);
                     clientOutputs.put(user, ps);
                     return user;
@@ -109,22 +108,13 @@ public class ChatServer{
         return null;
     }
 
+
     public static void broadcastOnlineUsers() {
         synchronized (clientOutputs) {
             String users = String.join(",", clientOutputs.keySet());
 
             for (PrintStream ps : clientOutputs.values()) {
                 ps.println("ONLINE:" + users);
-            }
-        }
-    }
-
-    public static void broadcast(String message, String sender) {
-        synchronized (clientOutputs) {
-            for (Map.Entry<String, PrintStream> entry : clientOutputs.entrySet()) {
-                if (entry.getKey()!=null) {
-                    entry.getValue().println("MSG:" + message);
-                }
             }
         }
     }
@@ -141,7 +131,9 @@ public class ChatServer{
             }
             if (toRemove != null) {
                 clientOutputs.remove(toRemove);
-                broadcast("❌ " + toRemove + " left the chat.", toRemove);
+                broadcastOnlineUsers();
+                GroupMessage grp=new GroupMessage(toRemove,"❌ " + toRemove + " left the chat.");
+                grp.send();
             }
         }
 
@@ -150,25 +142,23 @@ public class ChatServer{
         } catch (IOException ignored) {}
     }
 
+    public void logout(String line, PrintStream ps) {
+        String[] parts = line.split(":"); // expected format: "LOGOUT:username"
+        if (parts.length == 2) {
+            String user = parts[1];
 
-    public String createPrivate(String u1, String u2) {
-        if (!(s.contains(u1) && s.contains(u2))) {
-            System.out.println("Both of the users are not present");
-            return null;
-        }
-        PrivateRoom pr = new PrivateRoom(u1, u2);
-        if (!(mappings.containsKey(pr.getId()))) {
-            mappings.put(pr.getId(), pr);
-        }
-        return pr.getId();
-    }
+            // Remove user from the active clients map
+            if (clientOutputs.containsKey(user)) {
+                clientOutputs.remove(user);
+                System.out.println("✅ User logged out: " + user);
+            }
 
-    public void sendMessage(String id, String msg) {
-        PrivateRoom room = mappings.get(id);
-        if (room != null) {
-            room.sendMessage(msg);
+            // Broadcast updated online users to all remaining clients
+            broadcastOnlineUsers();
         } else {
-            System.out.println("Room with id " + id + " does not exist");
+            ps.println("LOGOUT_FAILED"); // invalid format
         }
     }
+
+
 }

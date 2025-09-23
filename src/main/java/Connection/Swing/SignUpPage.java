@@ -1,7 +1,5 @@
 package Connection.Swing;
 
-import net.Connect;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -11,9 +9,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
-import java.util.Map;
 
-class SignUpPage extends JFrame {
+class SignUpPage extends UITheme {
     private Connect connect;
     private JTextField usernameField;
     private JPasswordField passwordField;
@@ -21,14 +18,9 @@ class SignUpPage extends JFrame {
 
 
     public SignUpPage(Connect connect) {
+        super("LAN Chat - Sign Up",400,350);
         this.connect=connect;
         setupUI();
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(400, 350);
-        setLocationRelativeTo(null);
-        setTitle("LAN Chat - Sign Up");
-        setResizable(false);
-        setVisible(true);
     }
 
     private void setupUI() {

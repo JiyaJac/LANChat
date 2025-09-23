@@ -1,8 +1,7 @@
-package net;
+package Connection.Swing;
 
 import java.io.*;
 import java.net.*;
-import java.sql.SQLException;
 
 public class Connect {
     private String host;

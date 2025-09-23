@@ -1,7 +1,6 @@
 package Connection.Swing;
 
 
-import net.Connect;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -12,23 +11,18 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.SQLException;
 
-import static server.ChatServer.broadcastOnlineUsers;
 
-class LoginPage extends JFrame {
+
+class LoginPage extends UITheme {
 
     private Connect connect;
     private JTextField usernameField;
     private JPasswordField passwordField;
 
     public LoginPage(Connect connect) {
+        super("LAN Chat - Login",450,450);
         this.connect=connect;
-
         setupUI();
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(450, 450);
-        setLocationRelativeTo(null);
-        setTitle("LAN Chat - Login");
-        setResizable(false);
     }
 
     private void setupUI() {
@@ -124,12 +118,14 @@ class LoginPage extends JFrame {
     }
 
     private void attemptLogin() throws SQLException, ClassNotFoundException {
-
         String user = usernameField.getText().trim();
         String pass = new String(passwordField.getPassword());
 
         if (user.isEmpty() || pass.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter both username and password", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Please enter both username and password",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -140,21 +136,29 @@ class LoginPage extends JFrame {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             out.println("LOGIN:" + user + ":" + pass);
+
+            // ✅ Use readLine safely (with timeout option if needed)
             String response = in.readLine();
 
-            if ("LOGIN_SUCCESS".equals(response)) {
-                new ChatPage(connect, user).setVisible(true);
+            if (response != null && response.startsWith("LOGIN_SUCCESS")) {
+                ChatPage chatPage = new ChatPage(connect, user);
+                chatPage.setVisible(true);
                 this.dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        response != null ? response : "No response from server",
+                        "Login Failed",
+                        JOptionPane.ERROR_MESSAGE);
                 passwordField.setText("");
             }
-
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Could not connect to server: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Could not connect to server: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
-
     }
+
 
     private void goBack() {
         new ServerConnectionPage().setVisible(true);

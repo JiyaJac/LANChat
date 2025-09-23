@@ -1,7 +1,5 @@
 package Connection.Swing;
 
-import net.Connect;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
