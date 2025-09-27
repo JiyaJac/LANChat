@@ -32,23 +32,7 @@ public class DBConnection {
         return c;
     }
 
-
-    // Fetch all users into userCredentials
-//    public void fetchUsers() throws SQLException {
-//        String query1 = "SELECT * FROM USERS";
-//
-//        try {
-//            rs = st.executeQuery(query1);
-//
-//            // Process result set
-//            while (rs.next()) {
-//                String name = rs.getString("user_name");
-//                String pswd = rs.getString("password");
-//                userCredentials.put(name, pswd);
-//            }
-//        } finally {
-//            // Always close result set
-//            if (rs != null) rs.close();
-//        }
+//    public void close() throws SQLException {
+//        if (c != null && !c.isClosed()) c.close();
 //    }
 }

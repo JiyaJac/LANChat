@@ -5,21 +5,19 @@ package server.net;
 import server.ChatServer;
 import server.messages.GroupMessage;
 import server.messages.PrivateMessage;
-
 import java.io.*;
 import java.net.*;
 import java.sql.SQLException;
 import java.util.*;
-
 import static server.ChatServer.*;
 
-public class ConvoServer {
 
+public class ConvoServer {
     // Store connected clients
     public static final Map<String, PrintStream> clientOutputs = new HashMap<>();
 
     public static void main(String args[]) throws SQLException, ClassNotFoundException {
-        ChatServer svr=new ChatServer();
+        ChatServer svr = new ChatServer();
         try (ServerSocket server = new ServerSocket(888)) {
             System.out.println("Server started on port 888...");
 
@@ -30,7 +28,7 @@ public class ConvoServer {
                 // Handle each client in a new thread
                 new Thread(() -> {
                     try {
-                        handleClient(socket,svr);
+                        handleClient(socket, svr);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     } catch (ClassNotFoundException e) {
@@ -43,7 +41,7 @@ public class ConvoServer {
         }
     }
 
-    private static void handleClient(Socket socket,ChatServer svr) throws SQLException, ClassNotFoundException {
+    private static void handleClient(Socket socket, ChatServer svr) throws SQLException, ClassNotFoundException {
         try (
                 PrintStream ps = new PrintStream(socket.getOutputStream());
                 BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))
@@ -56,22 +54,20 @@ public class ConvoServer {
 
                 // Handle login
                 if (line.startsWith("LOGIN:")) {
-                    username=svr.login(line, ps);
+                    username = svr.login(line, ps);
 
                 }
 
                 //Handle signup
-                if (line.startsWith("SIGNUP:")){
-                    username=svr.signup(line,ps);
+                if (line.startsWith("SIGNUP:")) {
+                    username = svr.signup(line, ps);
 
                 }
 
-                if (line.startsWith("LOGOUT:")){
-                    svr.logout(line,ps);
+                if (line.startsWith("LOGOUT:")) {
+                    svr.logout(line, ps);
 
-                }
-
-                else if (line.startsWith("MSG:")) {
+                } else if (line.startsWith("MSG:")) {
                     if (username != null) {
                         // Format is "PRIVATE:<sender>:<recipient>:<message>"
                         String[] parts = line.split(":", 3);
@@ -87,9 +83,7 @@ public class ConvoServer {
                     } else {
                         ps.println("⚠️ Please login first.");
                     }
-                }
-
-                else if (line.startsWith("PRIVATE:")) {
+                } else if (line.startsWith("PRIVATE:")) {
                     if (username != null) {
                         // Format is "PRIVATE:<sender>:<recipient>:<message>"
                         String[] parts = line.split(":", 4);
@@ -106,11 +100,26 @@ public class ConvoServer {
                     } else {
                         ps.println("⚠️ Please login first.");
                     }
+                } else if (line.startsWith("FETCH_PRIVATE")) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 3) {
+                        String requester = parts[1];
+                        String otherUser = parts[2];
+                        svr.sendPrivateChatHistory(requester, otherUser);
+                    }
+                } else if (line.startsWith("FETCH_BROADCAST")) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 2) {
+                        String requester = parts[1];
+                        svr.sendBroadcastHistory(requester);
+                    }
                 }
             }
-        } catch (Exception e) {
-            System.out.println("⚠️ Client disconnected: " + socket.getInetAddress());
-        } finally{
+        } catch (java.net.SocketException e) {
+            System.out.println("⚠️ Client disconnected abruptly: " + socket.getInetAddress());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
             removeClient(socket);
         }
     }

@@ -1,16 +1,14 @@
 package server;
 
+
+
 import server.database.DBConnection;
 import server.messages.GroupMessage;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.sql.*;
-import java.util.HashMap;
 import java.util.Map;
-
-
 import static server.net.ConvoServer.clientOutputs;
 
 
@@ -48,7 +46,6 @@ public class ChatServer{
                         ps.println("LOGIN_SUCCESS");
                         broadcastOnlineUsers();
                         System.out.println("Login successful");
-                        clientOutputs.put(user, ps);
                         return user;
                     } else {
                         ps.println("LOGIN_FAILED");
@@ -141,6 +138,69 @@ public class ChatServer{
             socket.close();
         } catch (IOException ignored) {}
     }
+
+    public void sendPrivateChatHistory(String user1, String user2) {
+        String sql = "SELECT u1.user_name AS sender, u2.user_name AS receiver, message_text, sent_at " +
+                "FROM private_chat_history p " +
+                "JOIN users u1 ON p.sender_id = u1.id " +
+                "JOIN users u2 ON p.receiver_id = u2.id " +
+                "WHERE (u1.user_name=? AND u2.user_name=?) OR (u1.user_name=? AND u2.user_name=?) " +
+                "ORDER BY sent_at ASC";
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/lanchat", "root", "hehehehe");
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, user1);
+            stmt.setString(2, user2);
+            stmt.setString(3, user2);
+            stmt.setString(4, user1);
+
+            ResultSet rs = stmt.executeQuery();
+            PrintStream ps = clientOutputs.get(user1);
+
+            if (ps != null) {
+                while (rs.next()) {
+                    String sender = rs.getString("sender");
+                    String receiver = rs.getString("receiver"); // important!
+                    String content = rs.getString("message_text");
+
+                    ps.println("PRIVATE_HISTORY:" + sender + ":" + receiver + ":" + content);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void sendBroadcastHistory(String user) {
+        String sql = "SELECT u.user_name AS sender, message_text, sent_at " +
+                "FROM broadcast_chat_history b " +
+                "JOIN users u ON b.sender_id = u.id " +
+                "ORDER BY sent_at ASC";
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/lanchat", "root", "hehehehe");
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            PrintStream ps = clientOutputs.get(user);
+
+            if (ps != null) {
+                while (rs.next()) {
+                    String sender = rs.getString("sender");
+                    String content = rs.getString("message_text");
+                    ps.println("BROADCAST_HISTORY:" + sender + ":" + content);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void logout(String line, PrintStream ps) {
         String[] parts = line.split(":"); // expected format: "LOGOUT:username"

@@ -1,12 +1,15 @@
-package Connection.Swing;
-
+package Swing;
 
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,13 +133,7 @@ public class ChatPage extends UITheme {
         userListModel.clear();
         userListModel.addElement(username + " (You)");
         addMessageToGroup("System", "Welcome to the chat room, " + username + "!");
-
-        // Request online users from server after listener is ready
-        if (ps != null) {
-            ps.println("FETCH_ONLINE:" + username);
-        }
     }
-
 
     private void fetchBroadcastHistory() {
         if (ps == null) return;

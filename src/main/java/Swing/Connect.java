@@ -1,8 +1,8 @@
-package Connection.Swing;
+package Swing;
 
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.Socket;
 
 
 public class Connect {
