@@ -2,14 +2,13 @@ package server.net;
 
 
 
-import server.ChatServer;
 import server.messages.GroupMessage;
 import server.messages.PrivateMessage;
 import java.io.*;
 import java.net.*;
 import java.sql.SQLException;
 import java.util.*;
-import static server.ChatServer.*;
+import static server.net.ChatServer.*;
 
 
 public class ConvoServer {
@@ -62,6 +61,20 @@ public class ConvoServer {
                 if (line.startsWith("SIGNUP:")) {
                     username = svr.signup(line, ps);
 
+                }
+
+                else if (line.startsWith("FETCH_ONLINE")) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 2) {
+                        String requester = parts[1];
+                        synchronized (clientOutputs) {
+                            PrintStream clientPs = clientOutputs.get(requester);
+                            if (clientPs != null) {
+                                String users = String.join(",", clientOutputs.keySet());
+                                clientPs.println("ONLINE:" + users); // send online users to the requester only
+                            }
+                        }
+                    }
                 }
 
                 if (line.startsWith("LOGOUT:")) {

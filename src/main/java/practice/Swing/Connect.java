@@ -1,4 +1,4 @@
-package Swing;
+package practice.Swing;
 
 
 import java.io.IOException;

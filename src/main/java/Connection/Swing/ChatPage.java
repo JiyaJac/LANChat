@@ -34,8 +34,9 @@ public class ChatPage extends UITheme {
         }
 
         setupUI();
-        initializeChat();
         startMessageListener();
+        initializeChat();
+
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -112,6 +113,17 @@ public class ChatPage extends UITheme {
         ChatPanel groupPanel = new ChatPanel(null); // null recipient = group chat
         chatTabs.addTab("Group Chat", groupPanel);
 
+        chatTabs.addChangeListener(e -> {
+            int index = chatTabs.getSelectedIndex();
+            if (index >= 0) {
+                JPanel tabPanel = (JPanel) chatTabs.getTabComponentAt(index);
+                if (tabPanel != null) {
+                    tabPanel.setBackground(new Color(240, 240, 240)); // default color
+                }
+            }
+        });
+
+
         fetchBroadcastHistory();
 
         userList.addListSelectionListener(e -> {
@@ -156,7 +168,7 @@ public class ChatPage extends UITheme {
 
             fetchPrivateHistory(user);
         }
-        chatTabs.setSelectedComponent(privateChatTabs.get(user));
+        //chatTabs.setSelectedComponent(privateChatTabs.get(user));
         resetTabTitle(user);
     }
 
@@ -169,7 +181,8 @@ public class ChatPage extends UITheme {
 
     private JPanel makeClosableTab(String title, Component tabContent) {
         JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        tabPanel.setOpaque(false);
+        tabPanel.setOpaque(true); // needed for background color
+        tabPanel.setBackground(new Color(240, 240, 240)); // default color
 
         JLabel label = new JLabel(title);
         JButton closeBtn = new JButton("x");
@@ -187,6 +200,7 @@ public class ChatPage extends UITheme {
         tabPanel.add(closeBtn);
         return tabPanel;
     }
+
 
     public void startMessageListener() {
         new Thread(() -> {
@@ -217,9 +231,7 @@ public class ChatPage extends UITheme {
                                 privateChatTabs.get(tabKey).addMessage(sender, msg);
 
                                 // Add notification (*) if tab is not active
-                                if (chatTabs.getSelectedComponent() != privateChatTabs.get(tabKey)) {
-                                    addNotification(tabKey);
-                                }
+                                addNotification(tabKey);
                             });
                         }
                     }
@@ -278,14 +290,14 @@ public class ChatPage extends UITheme {
     }
 
     private void addNotification(String user) {
-        int index = chatTabs.indexOfComponent(privateChatTabs.get(user));
-        if (index >= 0) {
-            String title = chatTabs.getTitleAt(index);
-            if (!title.endsWith("*")) {
-                chatTabs.setTitleAt(index, title + "*");
-            }
+        ChatPanel panel = privateChatTabs.get(user);
+        int index = chatTabs.indexOfComponent(panel);
+        if (index >= 0 && chatTabs.getSelectedComponent() != panel) {
+            JPanel tabPanel = (JPanel) chatTabs.getTabComponentAt(index);
+            tabPanel.setBackground(new Color(144, 238, 144)); // light green
         }
     }
+
 
     private void resetTabTitle(String user) {
         int index = chatTabs.indexOfComponent(privateChatTabs.get(user));

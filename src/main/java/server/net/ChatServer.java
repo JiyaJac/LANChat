@@ -1,4 +1,4 @@
-package server;
+package server.net;
 
 
 
@@ -21,13 +21,15 @@ public class ChatServer{
 
 
     public String login(String line, PrintStream ps) {
-        Connection c = db.getC();
+
         String[] parts = line.split(":");
         if (parts.length == 3) {
             String user = parts[1];
             String pass = parts[2];
 
             try (
+                    Connection c = DriverManager.getConnection(
+                            "jdbc:mysql://localhost:3306/lanchat", "root", "hehehehe");
                  PreparedStatement stmt = c.prepareStatement("SELECT * FROM users WHERE user_name=? AND password=?")) {
 
                 stmt.setString(1, user);
@@ -72,8 +74,8 @@ public class ChatServer{
             String pass = parts[2];
 
             try (
-
-                Connection c=db.getC();
+                    Connection c = DriverManager.getConnection(
+                            "jdbc:mysql://localhost:3306/lanchat", "root", "hehehehe");
 
                 PreparedStatement checkStmt = c.prepareStatement("SELECT * FROM users WHERE user_name = ?");
                 PreparedStatement insertStmt = c.prepareStatement("INSERT INTO users (user_name, password) VALUES (?, ?)")) {
@@ -91,9 +93,9 @@ public class ChatServer{
                     insertStmt.executeUpdate();
 
                     ps.println("SIGNUP_SUCCESS"); // ✅ tell client
-                    broadcastOnlineUsers();
                     System.out.println("✅ New user registered: " + user);
                     clientOutputs.put(user, ps);
+                    broadcastOnlineUsers();
                     return user;
                 }
                 rs.close();
@@ -109,6 +111,8 @@ public class ChatServer{
     public static void broadcastOnlineUsers() {
         synchronized (clientOutputs) {
             String users = String.join(",", clientOutputs.keySet());
+
+            System.out.println("📢 Broadcasting online users: " + users);
 
             for (PrintStream ps : clientOutputs.values()) {
                 ps.println("ONLINE:" + users);
