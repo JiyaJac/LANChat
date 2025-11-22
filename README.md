@@ -2,8 +2,6 @@
 
 ## Basic Details
 
-**Hosted Project Link:** `[Add your GitHub link here]`
-
 ## Project Description
 
 **LANChat** is an offline LAN-based chat application built in Java. It allows multiple users to communicate over a local network without the need for internet. Features include:
@@ -60,15 +58,23 @@ Think of it as a private, offline messaging platform that works reliably whereve
 
 ## Screenshots
 
-**1. Home / Login Page**
+### **1. Home / Login Page**
 Allows users to enter a username and connect to the server.
+<img width="462" height="503" alt="image" src="https://github.com/user-attachments/assets/b6870382-06e8-4a66-8eef-d60d7860f86c" />
+<img width="455" height="492" alt="image" src="https://github.com/user-attachments/assets/6c2d592c-e401-425e-8b52-5185e1880a5d" />
+<img width="470" height="457" alt="image" src="https://github.com/user-attachments/assets/5a7214f4-4b62-4c8b-b8a0-1307453fe92f" />
 
 
-**2. Chat Window**
+### **2. Chat Window**
 Shows multiple groups, allows sending messages, and supports private messaging.
+<img width="761" height="552" alt="image" src="https://github.com/user-attachments/assets/6529cff5-81c0-40cc-bb96-b3ed4701b2ae" />
 
-**3. Server & Chat History**
+
+### **3. Notification & Logout**
 Server stores chat history which remains accessible even if moved across networks.
+<img width="758" height="574" alt="image" src="https://github.com/user-attachments/assets/ee854827-41a6-4fa3-bad0-567679f76fac" />
+<img width="793" height="606" alt="image" src="https://github.com/user-attachments/assets/895c449f-7d13-47b7-b8ed-281c89ddfee8" />
+
 
 
 ---
